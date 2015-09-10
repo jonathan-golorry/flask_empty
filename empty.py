@@ -2,7 +2,10 @@
 
 __all__ = ['Empty']
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+from flask.ext.sqlalchemy import SQLAlchemy
+from flask_limiter import Limiter
+from models import db, Request
 import logging
 
 basestring = getattr(__builtins__, 'basestring', str)
@@ -25,6 +28,9 @@ class Empty(Flask):
         self.config.from_object(config)
         # could/should be available in server environment
         self.config.from_envvar("APP_CONFIG", silent=True)
+
+    def rate_limit(self, limits):
+        self.limiter = Limiter(self, global_limits=limits)
 
     def add_blueprint(self, name, kw):
         blueprint = _import_variable(name, 'views', 'app')
@@ -55,6 +61,7 @@ class Empty(Flask):
         self.configure_template_filters()
         self.configure_extensions()
         self.configure_before_request()
+        #self.configure_after_request()
         self.configure_views()
 
     def configure_logger(self):
@@ -112,6 +119,12 @@ class Empty(Flask):
         """
         Database configuration should be set here
         """
+        #db = SQLAlchemy()
+        db.init_app(self)
+        with self.app_context():
+            db.create_all()
+
+        #db = SQLAlchemy(self)
         pass
 
     def configure_context_processors(self):
@@ -145,10 +158,26 @@ class Empty(Flask):
             print 'debugtoolbar extension not available.'
 
     def configure_before_request(self):
+        @self.before_request
+        def before_request():
+            r = Request()
+            db.session.add(r)
+            db.session.commit()
+        
+    def configure_after_request(self):
         pass
-
+        '''
+        @self.after_request
+        def after_request(response):
+            r = Request()
+            db.session.add(r)
+            db.session.commit()
+            return response
+        '''
+    
     def configure_views(self):
         """
         You can add some simple views here for fast prototyping
         """
+        
         pass

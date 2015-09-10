@@ -1,6 +1,7 @@
 # -*- config:utf-8 -*-
 
 import logging
+import os
 from datetime import timedelta
 
 project_name = "flask_empty"
@@ -19,6 +20,7 @@ class Config(object):
 
     # DATABASE CONFIGURATION
     # see http://docs.sqlalchemy.org/en/rel_0_9/core/engines.html#database-urls
+    #SQLALCHEMY_DATABASE_URI = 'sqlite:///%s/empty.sqlite3' % (os.path.dirname(__file__))
     SQLALCHEMY_DATABASE_URI = ""
     SQLALCHEMY_ECHO = False
 
